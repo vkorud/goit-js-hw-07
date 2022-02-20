@@ -1,19 +1,8 @@
 import { galleryItems } from './gallery-items.js';
-// Change code below this line
-
-console.log(galleryItems);
 
 
 const galleryContainer = document.querySelector(".gallery");
-const cardsMarkup = createCardsMarkup (galleryItems);
-
-galleryContainer.insertAdjacentHTML("beforeend", cardsMarkup);
-
-galleryContainer.addEventListener("click", onGalleryClick)
-
-function createCardsMarkup (items) {
-    return items.map(({ preview, original, description }) => {
-        return `
+const cardsMarkup = galleryItems.map(({ preview, original, description }) => `
     <div class="gallery__item">
         <a class="gallery__link" href="${original}">
             <img
@@ -23,10 +12,11 @@ function createCardsMarkup (items) {
             alt="${description}"
             />
         </a>
-    </div>`;
+    </div>`
         
-    }).join('');
-}
+    ).join('');
+
+galleryContainer.insertAdjacentHTML("beforeend", cardsMarkup);
 
 function onGalleryClick(evt) {
     if (!evt.target.nodeName === 'IMG') {
@@ -37,9 +27,15 @@ function onGalleryClick(evt) {
     modalShow(evt.target.dataset.source);
 }
 
-let instance;
+galleryContainer.addEventListener("click", onGalleryClick);
+
 function modalShow(src) {
-  instance = basicLightbox.create(
+  function onEscClick(event) {
+    if (event.code === 'Escape') {
+      instance.close();
+    }
+  };
+  const instance = basicLightbox.create(
     `
     <div class="modal">
         <img src="${src}" style="height:100vh; display:block"></img>
@@ -47,26 +43,12 @@ function modalShow(src) {
 `,
     {
       onShow: instance => {
-        addListener();
+        window.addEventListener('keydown', onEscClick);
       },
       onClose: instance => {
-        removeListener();
+        window.removeEventListener('keydown', onEscClick);
       },
     },
   );
   instance.show();
-}
-
-function addListener() {
-  window.addEventListener('keydown', onEscClick);
-}
-
-function onEscClick(event) {
-  if (event.code === 'Escape') {
-    instance.close();
-  }
-}
-
-function removeListener() {
-  window.removeEventListener('keydown', onEscClick);
 }
